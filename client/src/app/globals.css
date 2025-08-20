@@ -188,3 +188,14 @@
     letter-spacing: var(--tracking-normal);
   }
 }
+
+/* Add to your global CSS */
+.rtl-support {
+  direction: rtl;
+  text-align: right;
+}
+
+.flex-rtl {
+  display: flex;
+  direction: rtl;
+}

@@ -11,7 +11,15 @@ interface SpaceOption {
   max?: number;
 }
 
-const PropertySpaceDropdown: React.FC = () => {
+interface PropertySpaceDropdownProps {
+  onSpaceChange?: (space: { min?: number; max?: number } | null) => void;
+  initialSelected?: { min?: number; max?: number } | null;
+}
+
+const PropertySpaceDropdown: React.FC<PropertySpaceDropdownProps> = ({
+  onSpaceChange,
+  initialSelected = null
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<SpaceOption | null>(null);
   const [customMin, setCustomMin] = useState("");
@@ -32,6 +40,22 @@ const PropertySpaceDropdown: React.FC = () => {
     { id: "land-large", label: "أرض كبيرة (5000+ م²)", min: 5000 },
   ];
 
+  // Initialize with initialSelected if provided
+  useEffect(() => {
+    if (initialSelected) {
+      const matchingOption = spaceOptions.find(
+        opt => opt.min === initialSelected.min && opt.max === initialSelected.max
+      );
+      
+      if (matchingOption) {
+        setSelectedOption(matchingOption);
+      } else {
+        setCustomMin(initialSelected.min?.toString() || "");
+        setCustomMax(initialSelected.max?.toString() || "");
+      }
+    }
+  }, [initialSelected]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -50,10 +74,22 @@ const PropertySpaceDropdown: React.FC = () => {
 
   const handleConfirm = () => {
     setIsOpen(false);
+    
+    let spaceValue = null;
     if (customMin || customMax) {
-      console.log("Custom space:", { min: customMin, max: customMax });
+      spaceValue = {
+        min: customMin ? parseInt(customMin) : undefined,
+        max: customMax ? parseInt(customMax) : undefined
+      };
     } else if (selectedOption) {
-      console.log("Selected option:", selectedOption);
+      spaceValue = {
+        min: selectedOption.min,
+        max: selectedOption.max
+      };
+    }
+    
+    if (onSpaceChange) {
+      onSpaceChange(spaceValue);
     }
   };
 
@@ -63,12 +99,21 @@ const PropertySpaceDropdown: React.FC = () => {
     setCustomMin("");
     setCustomMax("");
     setSearchQuery("");
+    
+    if (onSpaceChange) {
+      onSpaceChange(null);
+    }
   };
 
-  const clearSelection = () => {
+  const clearSelection = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setSelectedOption(null);
     setCustomMin("");
     setCustomMax("");
+    
+    if (onSpaceChange) {
+      onSpaceChange(null);
+    }
   };
 
   const getDisplayText = () => {
@@ -79,40 +124,39 @@ const PropertySpaceDropdown: React.FC = () => {
   };
 
   return (
-    <div className=" max-w-sm relative" ref={dropdownRef}>
+    <div className="relative" ref={dropdownRef}>
       {/* Dropdown Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-lg hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all "
+        className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-lg hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
         dir="rtl"
       >
-        <div className="flex items-center">
-          <Ruler size={18} className="text-gray-400 ml-2" />
-          <ChevronDown
-            size={18}
-            className={`text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
-          />
-          {selectedOption && (
+        <div className="flex items-center gap-2">
+          <Ruler size={18} className="text-gray-400" />
+          {(selectedOption || customMin || customMax) && (
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                clearSelection();
-              }}
-              className="mr-2 p-1 hover:bg-gray-100 rounded-full"
+              onClick={clearSelection}
+              className="p-1 hover:bg-gray-100 rounded-full"
             >
               <X size={14} className="text-gray-500" />
             </button>
           )}
         </div>
+        
         <span className="flex-1 text-right text-gray-800 font-medium">
           {getDisplayText()}
         </span>
+        
+        <ChevronDown
+          size={18}
+          className={`text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
       </button>
 
       {/* Dropdown Content */}
       {isOpen && (
         <>
-          <div className="absolute min-w-[300px] top-full left-[-50px]  mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+          <div className="absolute min-w-[300px] w-full top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
             {/* Search Input */}
             <div className="p-3 border-b border-gray-100" dir="rtl">
               <div className="relative">
@@ -131,29 +175,40 @@ const PropertySpaceDropdown: React.FC = () => {
             {/* Options List */}
             <div className="max-h-60 overflow-y-auto" dir="rtl">
               {filteredOptions.length > 0 ? (
-                filteredOptions.map((opt) => (
-                  <button
-                    key={opt.id}
-                    onClick={() => {
-                      setSelectedOption(opt);
-                      setCustomMin("");
-                      setCustomMax("");
-                    }}
-                    className={`w-full text-right px-4 py-3 transition-colors flex items-center ${
-                      selectedOption?.id === opt.id
-                        ? "bg-blue-50 text-blue-700 border-r-4 border-r-blue-500"
-                        : "hover:bg-gray-50 text-gray-700"
-                    }`}
-                  >
-                    <span className="flex-1">{opt.label}</span>
-                    {selectedOption?.id === opt.id && (
-                      <div className="w-2 h-2 rounded-full bg-blue-500 ml-2"></div>
-                    )}
-                  </button>
-                ))
+                <div className="p-3 space-y-2">
+                  {filteredOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => {
+                        setSelectedOption(opt);
+                        setCustomMin("");
+                        setCustomMax("");
+                      }}
+                      className={`w-full flex items-center justify-between p-3 rounded-lg transition-all border ${
+                        selectedOption?.id === opt.id
+                          ? "bg-blue-50 border-blue-200 text-blue-700"
+                          : "border-gray-200 hover:bg-gray-50 text-gray-700"
+                      }`}
+                    >
+                      <span className="flex-1 text-right">{opt.label}</span>
+                      <div
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                          selectedOption?.id === opt.id
+                            ? "border-blue-500 bg-blue-500"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        {selectedOption?.id === opt.id && (
+                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               ) : (
-                <div className="px-4 py-3 text-center text-gray-500">
-                  لا توجد خيارات مطابقة
+                <div className="px-4 py-8 text-center text-gray-500">
+                  <Search size={32} className="mx-auto mb-2 text-gray-400" />
+                  <p>لا توجد خيارات مطابقة</p>
                 </div>
               )}
             </div>
@@ -202,7 +257,7 @@ const PropertySpaceDropdown: React.FC = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="p-3 bg-gray-50 border-t border-gray-200 flex gap-2">
+            <div className="p-3 bg-gray-50 border-t border-gray-200 flex gap-2" dir="rtl">
               <Button
                 variant="outline"
                 className="flex-1 text-gray-600 hover:bg-gray-200"

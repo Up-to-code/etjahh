@@ -9,9 +9,17 @@ interface City {
   name: string;
 }
 
-const CityDropdown: React.FC = () => {
+interface CityDropdownProps {
+  onCityChange?: (selectedCity: string | null) => void;
+  initialSelected?: string | null;
+}
+
+const CityDropdown: React.FC<CityDropdownProps> = ({ 
+  onCityChange, 
+  initialSelected = null 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [selectedCity, setSelectedCity] = useState<string | null>(initialSelected);
   const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -81,36 +89,33 @@ const CityDropdown: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleCityToggle = (cityId: string) => {
-    setSelectedCities((prev) =>
-      prev.includes(cityId)
-        ? prev.filter((id) => id !== cityId)
-        : [...prev, cityId]
-    );
-  };
+  useEffect(() => {
+    if (onCityChange) {
+      onCityChange(selectedCity);
+    }
+  }, [selectedCity, onCityChange]);
 
-  const handleConfirm = () => {
-    setIsOpen(false);
-    console.log("Selected cities:", selectedCities);
-  };
-
-  const handleCancel = () => {
-    setSelectedCities([]);
+  const handleCitySelect = (cityId: string) => {
+    setSelectedCity(cityId);
     setIsOpen(false);
     setSearchQuery("");
   };
 
-  const clearSelection = () => {
-    setSelectedCities([]);
+  const handleCancel = () => {
+    setSelectedCity(null);
+    setIsOpen(false);
+    setSearchQuery("");
+  };
+
+  const clearSelection = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedCity(null);
   };
 
   const getDisplayText = () => {
-    if (selectedCities.length === 0) return "اختر المدينة";
-    if (selectedCities.length === 1) {
-      const selected = cities.find((c) => c.id === selectedCities[0]);
-      return selected?.name || "غير محددة";
-    }
-    return `${selectedCities.length} مدن محددة`;
+    if (!selectedCity) return "اختر المدينة";
+    const selected = cities.find((c) => c.id === selectedCity);
+    return selected?.name || "غير محددة";
   };
 
   const filteredCities = cities.filter(city => {
@@ -125,33 +130,32 @@ const CityDropdown: React.FC = () => {
         className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-lg hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
         dir="rtl"
       >
-        <div className="flex items-center">
-          <MapPin size={18} className="text-gray-400 ml-2" />
-          <ChevronDown
-            size={18}
-            className={`text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
-          />
-          {selectedCities.length > 0 && (
+        <div className="flex items-center gap-2">
+          <MapPin size={18} className="text-gray-400" />
+          {selectedCity && (
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                clearSelection();
-              }}
-              className="mr-2 p-1 hover:bg-gray-100 rounded-full"
+              onClick={clearSelection}
+              className="p-1 hover:bg-gray-100 rounded-full"
             >
               <X size={14} className="text-gray-500" />
             </button>
           )}
         </div>
+        
         <span className="flex-1 text-right text-gray-800 font-medium">
           {getDisplayText()}
         </span>
+        
+        <ChevronDown
+          size={18}
+          className={`text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
       </button>
 
       {/* Dropdown Content */}
       {isOpen && (
         <>
-          <div className="absolute min-w-[300px] top-full left-[-50px] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+          <div className="absolute min-w-[300px] w-full top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
             {/* Header */}
             <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 flex items-center" dir="rtl">
               <Globe size={18} className="text-blue-600 ml-2" />
@@ -180,9 +184,9 @@ const CityDropdown: React.FC = () => {
                   {filteredCities.map((city) => (
                     <button
                       key={city.id}
-                      onClick={() => handleCityToggle(city.id)}
+                      onClick={() => handleCitySelect(city.id)}
                       className={`w-full flex items-center justify-between p-3 rounded-lg transition-all border ${
-                        selectedCities.includes(city.id)
+                        selectedCity === city.id
                           ? "bg-blue-50 border-blue-200 text-blue-700"
                           : "border-gray-200 hover:bg-gray-50 text-gray-700"
                       }`}
@@ -194,13 +198,13 @@ const CityDropdown: React.FC = () => {
                         </div>
                       </div>
                       <div
-                        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                          selectedCities.includes(city.id)
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                          selectedCity === city.id
                             ? "border-blue-500 bg-blue-500"
                             : "border-gray-300"
                         }`}
                       >
-                        {selectedCities.includes(city.id) && (
+                        {selectedCity === city.id && (
                           <div className="w-2 h-2 rounded-full bg-white"></div>
                         )}
                       </div>
@@ -215,21 +219,14 @@ const CityDropdown: React.FC = () => {
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="p-3 bg-gray-50 border-t border-gray-200 flex gap-2">
+            {/* Action Buttons - Only Cancel button needed for single selection */}
+            <div className="p-3 bg-gray-50 border-t border-gray-200 flex gap-2" dir="rtl">
               <Button
                 variant="outline"
                 className="flex-1 text-gray-600 hover:bg-gray-200"
                 onClick={handleCancel}
               >
                 إلغاء
-              </Button>
-              <Button
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
-                onClick={handleConfirm}
-                disabled={selectedCities.length === 0}
-              >
-                تأكيد ({selectedCities.length})
               </Button>
             </div>
           </div>

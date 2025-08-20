@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check, X } from "lucide-react";
 
 interface PropertyType {
   id: string;
@@ -13,11 +13,19 @@ interface PropertyCategory {
   تجاري: PropertyType[];
 }
 
+interface PropertyTypeDropdownProps {
+  onPropertyTypesChange?: (selectedTypes: string[]) => void;
+  initialSelected?: string[];
+}
+
 type CategoryKey = keyof PropertyCategory;
 
-const PropertyTypeDropdown: React.FC = () => {
+const PropertyTypeDropdown: React.FC<PropertyTypeDropdownProps> = ({
+  onPropertyTypesChange,
+  initialSelected = []
+}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(initialSelected);
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey>("سكني");
 
   const propertyTypes: PropertyCategory = {
@@ -42,21 +50,35 @@ const PropertyTypeDropdown: React.FC = () => {
   };
 
   const handleTypeToggle = (typeId: string) => {
-    setSelectedTypes((prev) =>
-      prev.includes(typeId)
-        ? prev.filter((id) => id !== typeId)
-        : [...prev, typeId]
-    );
+    const newSelectedTypes = selectedTypes.includes(typeId)
+      ? selectedTypes.filter((id) => id !== typeId)
+      : [...selectedTypes, typeId];
+    
+    setSelectedTypes(newSelectedTypes);
+    
+    if (onPropertyTypesChange) {
+      onPropertyTypesChange(newSelectedTypes);
+    }
   };
 
   const handleConfirm = () => {
     setIsOpen(false);
-    console.log("Selected types:", selectedTypes);
   };
 
   const handleCancel = () => {
     setSelectedTypes([]);
+    if (onPropertyTypesChange) {
+      onPropertyTypesChange([]);
+    }
     setIsOpen(false);
+  };
+
+  const clearSelection = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedTypes([]);
+    if (onPropertyTypesChange) {
+      onPropertyTypesChange([]);
+    }
   };
 
   const getDisplayText = () => {
@@ -71,30 +93,40 @@ const PropertyTypeDropdown: React.FC = () => {
   };
 
   return (
-    <div className=" max-w-sm relative">
+    <div className="relative">
       {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className=" flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-xl  transition-all"
+        className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-lg hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
         dir="rtl"
       >
-        <ChevronDown
-          size={20}
-          className={`text-slate-400 transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
-        <span className="flex-1 text-right text-slate-700 font-medium">
+        <div className="flex items-center gap-2">
+          {selectedTypes.length > 0 && (
+            <button
+              onClick={clearSelection}
+              className="p-1 hover:bg-gray-100 rounded-full"
+            >
+              <X size={14} className="text-gray-500" />
+            </button>
+          )}
+        </div>
+        
+        <span className="flex-1 text-right text-gray-800 font-medium">
           {getDisplayText()}
         </span>
+        
+        <ChevronDown
+          size={18}
+          className={`text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
       </button>
 
       {/* Dropdown Panel */}
       {isOpen && (
         <>
-          <div className="absolute min-w-[300px] top-full left-[-50px]  mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
-          {/* Tabs */}
-            <div className="flex bg-slate-50 border-b border-slate-200">
+          <div className="absolute min-w-[300px] w-full top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+            {/* Tabs */}
+            <div className="flex bg-gray-50 border-b border-gray-200">
               {(Object.keys(propertyTypes) as CategoryKey[]).map((cat) => (
                 <button
                   key={cat}
@@ -102,7 +134,7 @@ const PropertyTypeDropdown: React.FC = () => {
                   className={`flex-1 py-3 text-sm font-medium ${
                     selectedCategory === cat
                       ? "text-blue-600 bg-white border-b-2 border-blue-600"
-                      : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
+                      : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
                   }`}
                 >
                   {cat}
@@ -111,51 +143,49 @@ const PropertyTypeDropdown: React.FC = () => {
             </div>
 
             {/* List (scrollable) */}
-            <div className="p-3 flex-1 overflow-y-auto">
-              <div className="space-y-1">
+            <div className="max-h-60 overflow-y-auto p-3">
+              <div className="space-y-2">
                 {propertyTypes[selectedCategory].map((type) => (
                   <button
                     key={type.id}
                     onClick={() => handleTypeToggle(type.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition ${
+                    className={`w-full flex items-center justify-between p-3 rounded-lg transition-all border ${
                       selectedTypes.includes(type.id)
-                        ? "bg-blue-50 border border-blue-200 text-blue-700"
-                        : "hover:bg-slate-50 border border-transparent text-slate-700"
+                        ? "bg-blue-50 border-blue-200 text-blue-700"
+                        : "border-gray-200 hover:bg-gray-50 text-gray-700"
                     }`}
                     dir="rtl"
                   >
+                    <span className="flex-1 text-right mr-3 font-medium">
+                      {type.label}
+                    </span>
                     <div
-                      className={`w-5 h-5 rounded-md border-2 flex items-center justify-center ${
+                      className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                         selectedTypes.includes(type.id)
                           ? "border-blue-500 bg-blue-500"
-                          : "border-slate-300"
+                          : "border-gray-300"
                       }`}
                     >
                       {selectedTypes.includes(type.id) && (
                         <Check size={12} className="text-white" strokeWidth={3} />
                       )}
                     </div>
-                    <span className="flex-1 text-right mr-3 font-medium">
-                      {type.label}
-                    </span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Actions (Always visible) */}
-            <div className="p-3 bg-slate-50 border-t border-slate-200 flex gap-2 sticky bottom-0">
+            {/* Actions */}
+            <div className="p-3 bg-gray-50 border-t border-gray-200 flex gap-2" dir="rtl">
               <Button
                 variant="outline"
-                size="sm"
-                className="flex-1 border-slate-300 text-slate-600 hover:bg-slate-100"
+                className="flex-1 text-gray-600 hover:bg-gray-200"
                 onClick={handleCancel}
               >
                 إلغاء
               </Button>
               <Button
-                size="sm"
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
                 onClick={handleConfirm}
                 disabled={selectedTypes.length === 0}
               >
@@ -166,7 +196,7 @@ const PropertyTypeDropdown: React.FC = () => {
 
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40"
             onClick={() => setIsOpen(false)}
           />
         </>
