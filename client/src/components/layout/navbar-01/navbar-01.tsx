@@ -7,11 +7,11 @@ import ar from "@/lib/Internationalization/ar";
 const Navbar01Page = () => {
   return (
     <div className="">
-      <nav className="sticky top-0 z-50 h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="h-full flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="sticky top-0 z-50 h-18 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
+        <div className="h-full flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2">
           {/* Logo - Always visible */}
           <div className="flex-shrink-0">
-            <Logo />
+            <Logo  logo_name={ar["etjahh_real_estate"]}  />
           </div>
 
           {/* Desktop Navigation - Hidden on mobile */}

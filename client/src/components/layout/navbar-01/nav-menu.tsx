@@ -32,7 +32,7 @@ export function NavMenu({ ...props }: NavigationMenuProps) {
               <NavigationMenuLink asChild>
                 <Link 
                   href={link.href}
-                  className="block w-full py-2 px-4 md:p-0 rounded-md hover:bg-gray-100 md:hover:bg-transparent transition-colors text-right md:text-left"
+                  className="block w-full py-2 px-4 md:p-0 rounded-md hover:bg-gray-100 md:hover:bg-transparent transition-colors text-right md:text-left text-xl"
                 >
                   {link.label}
                 </Link>

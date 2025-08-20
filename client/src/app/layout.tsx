@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Almarai } from "next/font/google";
 import "./globals.css";
-import Navbar01Page from "@/components/navbar-01/navbar-01";
+import Navbar01Page from "@/components/layout/navbar-01/navbar-01";
+import FooterSection from "@/components/layout/Footer/footer";
 
 const almarai = Almarai({
   subsets: ["latin"],
@@ -16,10 +17,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl">
-      <body className={` ${almarai.variable} bg-zinc-100`}>
+      <body className={` ${almarai.variable} bg-white`}>
         <Navbar01Page />
-        {children}
-        </body>
+        <main className="min-h-screen">
+        {children} </main>
+        <FooterSection />
+      </body>
     </html>
   );
 }

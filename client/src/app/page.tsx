@@ -1,13 +1,12 @@
+import Hero from '@/components/Home/hero/Hero'
 import { Button } from '@/components/ui/button'
 import React from 'react'
 
 function page() {
   return (
-    <div>
-       <Button>
-
-       </Button>
-    </div>
+    <>
+       <Hero />
+    </>
   )
 }
 
