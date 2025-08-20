@@ -27,8 +27,8 @@ export function NavMenu({ ...props }: NavigationMenuProps) {
         {...props}
       >
         <NavigationMenuList className="flex flex-col md:flex-row-reverse items-start md:items-center gap-2 md:gap-6 py-4 md:py-0">
-          {navLinks.map((link) => (
-            <NavigationMenuItem key={link.href} className="w-full md:w-auto">
+          {navLinks.map((link , i) => (
+            <NavigationMenuItem key={i} className="w-full md:w-auto">
               <NavigationMenuLink asChild>
                 <Link 
                   href={link.href}

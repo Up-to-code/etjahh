@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Logo } from "./logo";
 import { NavMenu } from "./nav-menu";
-import { NavigationSheet } from "./navigation-sheet";
 import ar from "@/lib/Internationalization/ar";
 
 const Navbar01Page = () => {
@@ -19,20 +18,24 @@ const Navbar01Page = () => {
             <NavMenu />
           </div>
 
-          {/* Action Buttons & Mobile Menu */}
-          <div className="flex items-center gap-2">
-            {/* Auth/Action Buttons - Hidden on small mobile */}
-            <div className="hidden sm:flex items-center gap-2">
-              <Button variant="ghost" size="sm">
-                {"Login"}
-              </Button>
-              <Button size="sm">{"Get Started"}</Button>
-            </div>
-
-            {/* Mobile Menu Toggle */}
-            <div className="md:hidden">
-              <NavigationSheet />
-            </div>
+          {/* Mobile Navigation - Always visible */}
+          <div className="flex items-center justify-end gap-4 md:hidden">
+            <Button variant="ghost" size="icon">
+              <span className="sr-only">Open main menu</span>
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                />
+              </svg>
+            </Button>
           </div>
         </div>
       </nav>

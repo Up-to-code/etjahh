@@ -14,6 +14,7 @@ import {
 import PropertyTypeDropdown from "./PropertyTypeDropdown";
 import PropertySpaceDropdown from "./PropertySpaceDropdown";
 import PropertyPriceDropdown from "./PropertyPriceDropdown";
+import CityDropdown from "./CityDropdown";
 
 function SearchCard() {
   return (
@@ -26,7 +27,7 @@ function SearchCard() {
               <MapPin size={20} className="text-muted-foreground mr-3" />
               <Input
                 placeholder="أدخل الموقع..."
-                className="border-none shadow-none focus-visible:ring-0 text-right flex-1 placeholder:text-zinc-800 min-h-10"
+                className="border-none shadow-none focus-visible:ring-0 text-right flex-1 placeholder:text-zinc-800 min-h-10 pt-0.5"
                 dir="rtl"
               />
             </div>
@@ -42,6 +43,7 @@ function SearchCard() {
         </Button>
       </div>
       <div className="flex gap-2">
+        <CityDropdown/>
       <PropertyTypeDropdown/>
       <PropertySpaceDropdown/>
       <PropertyPriceDropdown/>
