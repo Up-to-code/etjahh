@@ -1,19 +1,20 @@
-import  { PropertyCardDemo } from '@/components/Home/a'
+ import PropertyCardDemo from '@/components/Home/a1'
 import HorizontalPropertyCard from '@/components/Home/a1'
 import Hero from '@/components/Home/hero/Hero'
 import TextDisplay from '@/components/Home/HorizontalPropertyCard'
 import RealEstateTrends from '@/components/Home/RealEstateTrends'
+import WhyUs from '@/components/Home/WhyUs'
 import { Button } from '@/components/ui/button'
-import React from 'react'
+ import React from 'react'
 
 function page() {
   return (
     <>
        <Hero />
-       <PropertyCardDemo/>
-       <HorizontalPropertyCard/>
-       <RealEstateTrends/>
-       <TextDisplay/>
+        <PropertyCardDemo/>
+        <RealEstateTrends/>
+        {/* <TextDisplay/> */}
+       <WhyUs/>
     </>
   )
 }

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Almarai } from "next/font/google";
 import "./globals.css";
-import Navbar01Page from "@/components/layout/navbar-01/navbar-01";
-import FooterSection from "@/components/layout/Footer/footer";
-
+ import FooterSection from "@/components/layout/Footer/footer";
+import Navbar01Page from "@/components/navbar-01/navbar-01";
+ 
 const almarai = Almarai({
   subsets: ["latin"],
   weight: ["400", "700"],
