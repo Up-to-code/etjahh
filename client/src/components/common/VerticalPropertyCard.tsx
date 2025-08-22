@@ -1,9 +1,11 @@
 import React from 'react'
 
-export default function page() {
+function VerticalPropertyCard() {
   return (
     <div>
       
     </div>
   )
 }
+
+export default VerticalPropertyCard
